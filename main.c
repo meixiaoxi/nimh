@@ -11,13 +11,22 @@ u16 gChargeCurrent;
 
 //type_error charge_error  pre  fast sup  trick  charging(on_off)  is_detect(电池检测) bat_state(valid)
 //the first byte is a dummy						
-u8 gBatStateBuf[5] = {0x0,0x10,0x00,0x00,0x10};
+u8 gBatStateBuf[5] = {0x0,0x00,0x00,0x00,0x00};
 
+/*
 u16 gBatVoltArray[4][6] = {	{0,0,0,0,0,0},
 						{0,0,0,0,0,0},
 						{0,0,0,0,0,0},
 						{0,0,0,0,0,0},
 					  };
+*/
+
+u16 gBatVoltArray[24];
+
+//#define gBatVoltArray(x,y)  *(p[x]+y)
+//#define gBatVoltArray(x,y) gBatVoltArrayTemp[x*6+y]
+
+//u16 *p[4] = {&(gBatVoltArrayTemp[0]),&(gBatVoltArrayTemp[6]),&(gBatVoltArrayTemp[12]),&(gBatVoltArrayTemp[18])};
 
 u8 gChargeSkipCount[] = {0,0,0,0};    //控制PWM周期
 
@@ -183,7 +192,7 @@ void chargeHandler(void)
 					ChargingTimeTick = 0;
 					removeBat(gIsChargingBatPos);
 				}
-				else if(tempV>BAT_MAX_VOLT_CLOSE  || (gChargeCurrent<<3) > tempV-gBatVoltArray[gBatNowBuf[gIsChargingBatPos]-1][0])  //
+				else if(tempV>BAT_MAX_VOLT_CLOSE  || (gChargeCurrent<<3) > tempV-gBatVoltArray[(gBatNowBuf[gIsChargingBatPos]-1)*6])  //
 				{
 					gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] &= ~(BAT_DETECT_BIT |CHARGE_STATE_ALL);
 					gBatStateBuf[gBatNowBuf[gIsChargingBatPos]] |= BAT_TYPE_ERROR;
@@ -271,14 +280,15 @@ void InitConfig()
 
 	
 }
-u16 vTemp;
-		extern void LED_ON(u8 led);
-		extern void LED_OFF(u8 led);
-		extern void delay_ms(u16);
+
+
+extern void LED_OFF(u8 led);
+extern void LED_ON(u8 led);
+extern void delay_ms(u16 nus);
 void main() 
 {
 	
-	u8 cur_detect_pos=1;
+	u8 cur_detect_pos=1,pos;
 	u16 tempVoltClose,tempVoltOpen;
 	
 	InitConfig();
@@ -288,15 +298,15 @@ void main()
 
 	t8n_start();
 	t8p1_start();
-	
-		LED_ON(1);delay_ms(600);
-		LED_OFF(1);delay_ms(600);
-		//LED_ON(1);delay_us(600);
 
+	WDTC = 0x0F;
 
+	LED_ON(1);delay_ms(100);
+	LED_OFF(1);delay_ms(100);
+	LED_ON(1);delay_ms(100);
+	LED_OFF(1);delay_ms(600);
 	while(1)
-	{	
-		#if 1
+	{
 		if(gBatStateBuf[cur_detect_pos] & HAS_BATTERY)
 		{
 			//getVbatAdc(cur_detect_pos);
@@ -306,14 +316,12 @@ void main()
 		
 			if((gBatStateBuf[cur_detect_pos] & BAT_DETECT_BIT) == 0)
 			{	
-						LED_ON(1);delay_ms(600);
-		LED_OFF(1);delay_ms(600);
-			tempVoltClose =  getVbatAdc(cur_detect_pos);	//gBatVoltArray[cur_detect_pos-1][0]= getVbatAdc(cur_detect_pos);
-							LED_ON(1);delay_ms(600);
-		LED_OFF(1);delay_ms(600);
-				if(gBatVoltArray[cur_detect_pos-1][0] >= BAT_MIN_VOLT_OPEN)
+				LED_ON(1);delay_ms(600);
+				gBatVoltArray[6*(cur_detect_pos-1)]=  1;//getVbatAdc(cur_detect_pos);	//gBatVoltArray[cur_detect_pos-1][0]= getVbatAdc(cur_detect_pos);
+				LED_OFF(1);delay_ms(600);
+				if(gBatVoltArray[6*(cur_detect_pos-1)] >= BAT_MIN_VOLT_OPEN)
 				{
-					if(gBatVoltArray[cur_detect_pos-1][0] >= BAT_MAX_VOLT_OPEN)
+					if(gBatVoltArray[6*(cur_detect_pos-1)] >= BAT_MAX_VOLT_OPEN)
 					{
 						gBatStateBuf[cur_detect_pos] |= BAT_TYPE_ERROR;
 					}
@@ -321,27 +329,19 @@ void main()
 					{
 						gBatStateBuf[cur_detect_pos] |= (CHARGE_STATE_PRE|BAT_DETECT_BIT);
 					}
-					gBatNumNow++;					
+				//	gBatNumNow++;					
 					gBatNowBuf[gBatNumNow] = cur_detect_pos;
 				}
 			}	
 		}
-		#endif
-		LED_ON(1);delay_ms(600);
-		LED_OFF(1);delay_ms(600);
-		LED_ON(1);delay_ms(600);
-		chargeHandler();
-		LED_OFF(1);delay_ms(600);
-		//ledHandler();
+	//	chargeHandler();
+	//	ledHandler();
 		cur_detect_pos++;
-		if(cur_detect_pos%4 == 0)
+		if(cur_detect_pos > 4)
 			cur_detect_pos=1;
-		else
-			cur_detect_pos = cur_detect_pos%4;
 
 	}
 		
 	
 	
 }
-

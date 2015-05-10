@@ -9,7 +9,10 @@ void delay_ms(u16 nus)
 {
     unsigned int i , j;
     for(i=0;i<nus;i++)
+   {
+   	__Asm CWDT;
 	for(j=0;j<1000;j++);
+    }
 }
 
 void delay_us(u16 nus)

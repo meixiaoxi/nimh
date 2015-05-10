@@ -1,6 +1,7 @@
 #include "nimh.h"
 #include "hic.h"
 
+#if 0
 const char digits[] = "0123456789abcdef";
 void send(u16 sData)
 {
@@ -38,3 +39,4 @@ void sendStr(char str[])
         while(!TXIF);           //等待发送中断标志位 
         TXIF = 0;               //清发送中断标志位 
 }
+#endif

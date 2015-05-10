@@ -1,14 +1,11 @@
 #include "nimh.h"
 #include "hic.h"
 
-u8 tempStr1[] = "temp1:";
-u8 tempStr2[] = "temp2:";
+//u8 tempStr1[] = "temp1:";
+//u8 tempStr2[] = "temp2:";
 
 extern u16 gChargeCurrent;
 
-extern void LED_ON(u8 led);
-extern void LED_OFF(u8 led);
-extern void delay_ms(u16);
 u16 getAdcValue(u8 channel)
 {
 	
@@ -20,11 +17,8 @@ u16 getAdcValue(u8 channel)
 
 
 	ADTRG=1;
-				LED_ON(1);delay_ms(600);
-		LED_OFF(1);delay_ms(600);
 	while(ADTRG) {;}
-			LED_ON(1);delay_ms(600);
-		LED_OFF(1);delay_ms(600);
+
 	tempL = ADCRL;	
 	tempH = ADCRH;
 	
@@ -66,11 +60,11 @@ u16 getAverage(u8 channel)
 
 	return (ret - max - min)>>3;
 }
+
 u16 getVbatAdc(u8 channel)
 {
 	u16 temp1,temp2;
-					LED_ON(1);delay_ms(600);
-		LED_OFF(1);delay_ms(600);
+
 
 	switch(channel)
 	{
@@ -86,9 +80,7 @@ u16 getVbatAdc(u8 channel)
 			break;
 	}
 
-	
-					LED_ON(1);delay_ms(600);
-		LED_OFF(1);delay_ms(600);
+
 	gChargeCurrent= getAverage(CHANNEL_20_RES);
 	temp2 = getAverage(channel);
 

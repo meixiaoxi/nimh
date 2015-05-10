@@ -28,7 +28,7 @@
 #define CHARGE_STATE_FAST					(1<<4)
 #define CHARGE_STATE_SUP					(1<<3)
 #define CHARGE_STATE_TRICK					(1<<2)
-#define BAT_DETECT_BIT			(1<<1)   //电池测试
+#define BAT_DETECT_BIT						(1<<1)   //电池测试
 #define BAT_CHECK_BIT						(1<<0)   //有无电池
 
 #define BAT_MIN_VOLT_OPEN	496 			//(0.4/3.3)*4096
